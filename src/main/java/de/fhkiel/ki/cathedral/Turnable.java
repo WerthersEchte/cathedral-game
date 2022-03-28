@@ -66,7 +66,8 @@ public enum Turnable {
   }
 
   /**
-   * Gets a list of possible {@link Direction}s this enum-value and subsequent forms can be turned to.
+   * Gets a list of possible {@link Direction}s this enum-value and subsequent forms can be turned
+   * to.
    *
    * @return a unmodifiable list of the possible {@link Direction}s.
    */
@@ -86,7 +87,7 @@ public enum Turnable {
    * @param direction the {@link Direction} to convert
    * @return the {@link Direction} that corresponds to the given {@link Direction}
    */
-  public Direction getRealDirection(Direction direction){
-    return possibleDirections.get(direction.getId()% getNumberOfPossibleForms());
+  public Direction getRealDirection(Direction direction) {
+    return possibleDirections.get(direction.getId() % getNumberOfPossibleForms());
   }
 }
