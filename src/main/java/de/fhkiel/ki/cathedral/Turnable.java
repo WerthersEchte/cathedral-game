@@ -52,10 +52,7 @@ public enum Turnable {
 
   Turnable(Direction... possibleDirections) {
     this.numberOfPossibleForms = possibleDirections.length;
-    this.possibleDirections =
-        Arrays
-            .stream(possibleDirections)
-            .collect(Collectors.toUnmodifiableList());
+    this.possibleDirections = Arrays.stream(possibleDirections).toList();
   }
 
   /**
