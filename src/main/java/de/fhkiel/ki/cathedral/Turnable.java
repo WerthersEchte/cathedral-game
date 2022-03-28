@@ -2,7 +2,6 @@ package de.fhkiel.ki.cathedral;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The enum Turnable describes if a {@link Building} can be turned
