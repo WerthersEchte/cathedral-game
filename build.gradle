@@ -2,6 +2,7 @@ plugins {
     id 'java'
     // https://github.com/melix/jmh-gradle-plugin
     id "me.champeau.jmh" version "0.6.6"
+    id 'jacoco'
 }
 
 group 'de.fhkiel.ki'
@@ -27,4 +28,10 @@ test {
 java {
     withSourcesJar()
     withJavadocJar()
+}
+
+jacocoTestReport {
+    reports {
+        csv.enabled true
+    }
 }
