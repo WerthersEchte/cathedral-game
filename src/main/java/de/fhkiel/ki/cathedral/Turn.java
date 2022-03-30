@@ -1,6 +1,7 @@
 package de.fhkiel.ki.cathedral;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The class Turn is a storage class to store turns in a {@link Game}.
@@ -98,6 +99,23 @@ public class Turn {
    */
   public Placement getAction() {
     return action;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Turn turn = (Turn) o;
+    return turnNumber == turn.turnNumber && Objects.equals(board, turn.board) && Objects.equals(action, turn.action);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(turnNumber, board, action);
   }
 
   /**
