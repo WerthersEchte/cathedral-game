@@ -1,9 +1,12 @@
 package de.fhkiel.ki.cathedral;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,8 +75,18 @@ public class Board {
 
     regionsBuild = false;
     if (!fast) {
-      buildRegions();
-      buildRegions();
+      int numberOfConnections = 0;
+      for(Position corner : placement.building().corners(placement.direction())){
+        Position point = placement.position().plus(corner);
+        if (!point.isViable() || field[point.y()][point.x()] == placement.building().getColor() ){
+          numberOfConnections += 1;
+          if(numberOfConnections > 1){
+            buildRegions();
+            // buildRegions(); //check for region in region bug
+            break;
+          }
+        }
+      }
     }
 
     return true;
@@ -114,70 +127,68 @@ public class Board {
 
   private void buildRegions() {
     Arrays.stream(new Color[] {Color.Black, Color.White}).forEach(color -> {
-      Stack<Position> freeFields = new Stack<>();
+      int[][] fieldWithoutColor = new int[10][10];
       for (int y = 0; y < 10; ++y) {
         for (int x = 0; x < 10; ++x) {
-          if (this.field[y][x] != color) {
-            freeFields.add(new Position(x, y));
+          if(field[y][x] != color){
+            fieldWithoutColor[y][x] = 1;
           }
         }
       }
-      while (!freeFields.isEmpty()) {
-        Stack<Position> freeFieldsToLookAt = new Stack<>();
-        freeFieldsToLookAt.push(freeFields.pop());
+      int runner = 0;
+      while (runner < 100) {
+        if(fieldWithoutColor[runner/10][runner%10] == 1) {
+          Deque<Position> freeFieldsToLookAt = new LinkedList<>();
+          freeFieldsToLookAt.push(new Position(runner%10, runner/10));
+          fieldWithoutColor[runner/10][runner%10] = 0;
 
-        List<Position> region = new ArrayList<>();
-        Set<Direction> borders = new HashSet<>();
+          List<Position> region = new ArrayList<>();
+          Set<Direction> borders = new HashSet<>();
 
-        while (!freeFieldsToLookAt.isEmpty()) {
-          Position currentField = freeFieldsToLookAt.pop();
+          while (!freeFieldsToLookAt.isEmpty()) {
+            Position currentField = freeFieldsToLookAt.pop();
 
-          region.add(currentField);
+            region.add(currentField);
 
-          for (int y = -1; y < 2; ++y) {
-            final int realY = currentField.y() + y;
-            if (realY < 0) {
-              borders.add(Direction._0);
-              continue;
-            }
-            if (realY > 9) {
-              borders.add(Direction._180);
-              continue;
-            }
-            for (int x = -1; x < 2; ++x) {
-              final int realX = currentField.x() + x;
-              if (realX < 0) {
-                borders.add(Direction._270);
-                continue;
-              }
-              if (realX > 9) {
-                borders.add(Direction._90);
-                continue;
-              }
-              Optional<Position> fieldToLookAt = freeFields.stream()
-                  .filter(position -> position.equals(new Position(realX, realY))).findAny();
-              if (fieldToLookAt.isPresent()) {
-                freeFieldsToLookAt.push(fieldToLookAt.get());
-                freeFields.remove(fieldToLookAt.get());
+            int xMin = -1;
+            int xMax = 2;
+            for (int y = -1; y < 2; ++y) {
+              final int yToLookAt = currentField.y() + y;
+              if (yToLookAt < 0) {
+                borders.add(Direction._0);
+              } else if (yToLookAt > 9) {
+                borders.add(Direction._180);
+              } else {
+                for (int x = xMin; x < xMax; ++x) {
+                  if (x != 0 || y != 0) {
+                    final int xToLookAt = currentField.x() + x;
+                    if (xToLookAt < 0) {
+                      borders.add(Direction._270);
+                      ++xMin;
+                    } else if (xToLookAt > 9) {
+                      borders.add(Direction._90);
+                      --xMax;
+                    } else if (fieldWithoutColor[yToLookAt][xToLookAt] == 1) {
+                      freeFieldsToLookAt.push(new Position(xToLookAt, yToLookAt));
+                      fieldWithoutColor[yToLookAt][xToLookAt] = 0;
+                    }
+                  }
+                }
               }
             }
           }
-        }
 
-        if (borders.size() < 3 && isNotAlreadyOwned(region, color)) {
-          List<Placement> enemyBuildingsInRegion = getAllEnemyBuildingsInRegion(region, color);
-          if (enemyBuildingsInRegion.size() < 2) {
-            enemyBuildingsInRegion.forEach(this::removePlacement);
-            placeColor(region, Color.getSubColor(color), 0, 0);
+          if (borders.size() < 3) {
+            List<Placement> enemyBuildingsInRegion = getAllEnemyBuildingsInRegion(region, color);
+            if (enemyBuildingsInRegion.size() < 2) {
+              enemyBuildingsInRegion.forEach(this::removePlacement);
+              placeColor(region, Color.getSubColor(color), 0, 0);
+            }
           }
         }
+        runner += 1;
       }
     });
-  }
-
-  private boolean isNotAlreadyOwned(List<Position> region, Color color) {
-    return region.stream()
-        .anyMatch(position -> field[position.y()][position.x()] != Color.getSubColor(color));
   }
 
   private List<Placement> getAllEnemyBuildingsInRegion(List<Position> region, Color color) {
@@ -190,7 +201,7 @@ public class Board {
   private void removePlacement(Placement placement) {
     placedBuildings.remove(placement);
     freeBuildings.put(placement.building(), freeBuildings.getOrDefault(placement.building(), 0) + 1);
-    placeColor(placement.form(), Color.None, placement.x(), placement.y());
+    //placeColor(placement.form(), Color.None, placement.x(), placement.y());
   }
 
   private void placeColor(List<Position> form, Color color, int x, int y) {
@@ -257,5 +268,4 @@ public class Board {
     }
     return boardAsString.toString();
   }
-
 }

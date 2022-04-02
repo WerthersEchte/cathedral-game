@@ -38,13 +38,13 @@ public class BoardBenchmark {
     }
 
     @State(Scope.Benchmark)
-    public static class FiveTunsInBoard {
+    public static class FiveTurnsInBoard {
         public static Board base = new Board();
         public static Placement placement = new Placement(8, 7, Direction._270, Building.Black_Castle);
 
         public Board test;
 
-        public FiveTunsInBoard(){
+        public FiveTurnsInBoard(){
             base.placeBuilding(new Placement(3, 3, Direction._0, Building.Blue_Cathedral));
             base.placeBuilding(new Placement(8, 3, Direction._270, Building.Black_Academy));
             base.placeBuilding(new Placement(7, 1, Direction._0, Building.White_Castle));
@@ -61,18 +61,18 @@ public class BoardBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void benchmarkPlaceOnFiveTunsInBoard(FiveTunsInBoard board) {
+    public void benchmarkPlaceOnFiveTurnsInBoard(FiveTurnsInBoard board) {
         board.test.placeBuilding(board.placement);
     }
 
     @State(Scope.Benchmark)
-    public static class TenTunsInBoard {
+    public static class TenTurnsInBoard {
         public static Board base = new Board();
         public static Placement placement = new Placement(1, 6, Direction._0, Building.White_Abbey);
 
         public Board test;
 
-        public TenTunsInBoard(){
+        public TenTurnsInBoard(){
             base.placeBuilding(new Placement(3, 3, Direction._0, Building.Blue_Cathedral));
             base.placeBuilding(new Placement(8, 3, Direction._270, Building.Black_Academy));
             base.placeBuilding(new Placement(7, 1, Direction._0, Building.White_Castle));
@@ -95,18 +95,18 @@ public class BoardBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void benchmarkPlaceOnTenTunsInBoard(TenTunsInBoard board) {
+    public void benchmarkPlaceOnTenTurnsInBoard(TenTurnsInBoard board) {
         board.test.placeBuilding(board.placement);
     }
 
     @State(Scope.Benchmark)
-    public static class FifteenTunsInBoard {
+    public static class FifteenTurnsInBoard {
         public static Board base = new Board();
         public static Placement placement = new Placement(8, 9, Direction._90, Building.Black_Bridge);
 
         public Board test;
 
-        public FifteenTunsInBoard(){
+        public FifteenTurnsInBoard(){
             base.placeBuilding(new Placement(3, 3, Direction._0, Building.Blue_Cathedral));
             base.placeBuilding(new Placement(8, 3, Direction._270, Building.Black_Academy));
             base.placeBuilding(new Placement(7, 1, Direction._0, Building.White_Castle));
@@ -135,7 +135,79 @@ public class BoardBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.Throughput)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void benchmarkPlaceOnFifteenTunsInBoard(FifteenTunsInBoard board) {
+    public void benchmarkPlaceOnFifteenTurnsInBoard(FifteenTurnsInBoard board) {
         board.test.placeBuilding(board.placement);
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    public void benchmarkNewBoardAndFifteenTurns() {
+        Board base = new Board();
+
+        base.placeBuilding(new Placement(3, 3, Direction._0, Building.Blue_Cathedral));
+        base.placeBuilding(new Placement(8, 3, Direction._270, Building.Black_Academy));
+        base.placeBuilding(new Placement(7, 1, Direction._0, Building.White_Castle));
+        base.placeBuilding(new Placement(7, 5, Direction._90, Building.Black_Manor));
+        base.placeBuilding(new Placement(6, 7, Direction._0, Building.White_Infirmary));
+
+        base.placeBuilding(new Placement(8, 7, Direction._270, Building.Black_Castle));
+        base.placeBuilding(new Placement(4, 1, Direction._180, Building.White_Academy));
+        base.placeBuilding(new Placement(1, 1, Direction._0, Building.Black_Infirmary));
+        base.placeBuilding(new Placement(4, 8, Direction._90, Building.White_Manor));
+        base.placeBuilding(new Placement(3, 7, Direction._270, Building.Black_Tower));
+
+        base.placeBuilding(new Placement(1, 6, Direction._0, Building.White_Abbey));
+        base.placeBuilding(new Placement(1, 4, Direction._0, Building.Black_Abbey));
+        base.placeBuilding(new Placement(5, 4, Direction._270, Building.White_Tower));
+        base.placeBuilding(new Placement(0, 8, Direction._0, Building.Black_Square));
+        base.placeBuilding(new Placement(9, 1, Direction._0, Building.White_Bridge));
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    public void benchmarkNewBoardAndTenTurns() {
+        Board base = new Board();
+
+        base.placeBuilding(new Placement(3, 3, Direction._0, Building.Blue_Cathedral));
+        base.placeBuilding(new Placement(8, 3, Direction._270, Building.Black_Academy));
+        base.placeBuilding(new Placement(7, 1, Direction._0, Building.White_Castle));
+        base.placeBuilding(new Placement(7, 5, Direction._90, Building.Black_Manor));
+        base.placeBuilding(new Placement(6, 7, Direction._0, Building.White_Infirmary));
+
+        base.placeBuilding(new Placement(8, 7, Direction._270, Building.Black_Castle));
+        base.placeBuilding(new Placement(4, 1, Direction._180, Building.White_Academy));
+        base.placeBuilding(new Placement(1, 1, Direction._0, Building.Black_Infirmary));
+        base.placeBuilding(new Placement(4, 8, Direction._90, Building.White_Manor));
+        base.placeBuilding(new Placement(3, 7, Direction._270, Building.Black_Tower));
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    public void benchmarkNewBoardAndFiveTurns() {
+        Board base = new Board();
+
+        base.placeBuilding(new Placement(3, 3, Direction._0, Building.Blue_Cathedral));
+        base.placeBuilding(new Placement(8, 3, Direction._270, Building.Black_Academy));
+        base.placeBuilding(new Placement(7, 1, Direction._0, Building.White_Castle));
+        base.placeBuilding(new Placement(7, 5, Direction._90, Building.Black_Manor));
+        base.placeBuilding(new Placement(6, 7, Direction._0, Building.White_Infirmary));
+    }
+
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    public Board benchmarkNewBoardAndNoTurns() {
+        return new Board();
+    }
+
+    private static Board boardToCopy = new Board();
+    @Benchmark
+    @BenchmarkMode(Mode.Throughput)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    public Board benchmarkCopyBoardAndNoTurns() {
+        return boardToCopy.copy();
     }
 }
