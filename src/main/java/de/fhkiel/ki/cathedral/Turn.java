@@ -110,7 +110,9 @@ public class Turn {
       return false;
     }
     Turn turn = (Turn) o;
-    return turnNumber == turn.turnNumber && Objects.equals(board, turn.board) && Objects.equals(action, turn.action);
+    return turnNumber == turn.turnNumber
+        && Objects.equals(board, turn.board)
+        && Objects.equals(action, turn.action);
   }
 
   @Override
