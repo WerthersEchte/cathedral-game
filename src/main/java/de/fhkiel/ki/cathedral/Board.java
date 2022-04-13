@@ -125,6 +125,19 @@ public class Board {
     return freeBuildings.keySet();
   }
 
+  public List<Building> getPlacableBuildings(Color player) {
+    return getBuildings().stream()
+        .filter(building -> building.getColor() == player)
+        .filter(building -> getNumberOfFreeBuildings(building) > 0)
+        .toList();
+  }
+
+  public List<Building> getAllUnplacedBuildings() {
+    return getBuildings().stream()
+        .filter(building -> getNumberOfFreeBuildings(building) > 0)
+        .toList();
+  }
+
   private void buildRegions() {
     Arrays.stream(new Color[] {Color.Black, Color.White}).forEach(color -> {
       int[][] fieldWithoutColor = new int[10][10];

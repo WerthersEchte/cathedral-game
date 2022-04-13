@@ -132,7 +132,7 @@ public class Turn {
   public String toString() {
     return
         "Turn: " + turnNumber
-        + " Action: " + action
+        + " Action: " + (action!=null?action:"No Action")
         + "\nScore: B " + score().get(Color.Black) + " | " + score().get(Color.White)
         + " W\n" + board;
   }
