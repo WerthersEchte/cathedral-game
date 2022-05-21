@@ -213,7 +213,7 @@ public class Game {
    * There are always scores for the {@link Color#Black} and the {@link Color#White} contained. <br>
    * They range from 47 to 0 and show the aggregate of all unplaced buildings of the chosen color.
    *
-   * @return the map with the core for {@link Color#Black} and {@link Color#White}
+   * @return the map with the score for {@link Color#Black} and {@link Color#White}
    */
   public Map<Color, Integer> score() {
     return lastTurn().score();
