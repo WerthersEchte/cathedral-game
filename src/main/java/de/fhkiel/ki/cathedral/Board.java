@@ -32,6 +32,8 @@ public class Board {
 
   private final Color[][] field = new Color[10][10];
 
+  private int numberOfPlacements = 0;
+
   /**
    * Instantiates a new Board with all defauld {@link Building}s.
    */
@@ -63,6 +65,8 @@ public class Board {
    */
   public Board copy() {
     Board newBoard = new Board( new Building[]{} );
+
+    newBoard.numberOfPlacements = numberOfPlacements;
 
     newBoard.freeBuildings.putAll(freeBuildings);
     newBoard.placedBuildings.addAll(placedBuildings);
@@ -110,7 +114,7 @@ public class Board {
             1); //do not want any negative building number
     placedBuildings.add(placement);
 
-    if (!fast) {
+    if (!fast && numberOfPlacements >= 3) {
       int numberOfConnections = 0;
       for(Position corner : placement.building().corners(placement.direction())){
         Position point = placement.position().plus(corner);
@@ -123,6 +127,8 @@ public class Board {
         }
       }
     }
+
+    numberOfPlacements += 1;
 
     return true;
   }
@@ -293,7 +299,6 @@ public class Board {
           fieldWithoutColor[runner/10][runner%10] = 0;
 
           List<Position> region = new ArrayList<>();
-          Set<Direction> borders = new HashSet<>();
 
           while (!freeFieldsToLookAt.isEmpty()) {
             Position currentField = freeFieldsToLookAt.pop();
@@ -304,19 +309,15 @@ public class Board {
             int xMax = 2;
             for (int y = -1; y < 2; ++y) {
               final int yToLookAt = currentField.y() + y;
-              if (yToLookAt < 0) {
-                borders.add(Direction._0);
-              } else if (yToLookAt > 9) {
-                borders.add(Direction._180);
+              if (yToLookAt < 0 || yToLookAt > 9) {
+                continue;
               } else {
                 for (int x = xMin; x < xMax; ++x) {
                   if (x != 0 || y != 0) {
                     final int xToLookAt = currentField.x() + x;
                     if (xToLookAt < 0) {
-                      borders.add(Direction._270);
                       ++xMin;
                     } else if (xToLookAt > 9) {
-                      borders.add(Direction._90);
                       --xMax;
                     } else if (fieldWithoutColor[yToLookAt][xToLookAt] == 1) {
                       freeFieldsToLookAt.push(new Position(xToLookAt, yToLookAt));
@@ -328,12 +329,10 @@ public class Board {
             }
           }
 
-          if (borders.size() < 3) {
-            List<Placement> enemyBuildingsInRegion = getAllEnemyBuildingsInRegion(region, color);
-            if (enemyBuildingsInRegion.size() < 2) {
-              enemyBuildingsInRegion.forEach(this::removePlacement);
-              placeColor(region, Color.getSubColor(color), 0, 0);
-            }
+          List<Placement> enemyBuildingsInRegion = getAllEnemyBuildingsInRegion(region, color);
+          if (enemyBuildingsInRegion.size() < 2) {
+            enemyBuildingsInRegion.forEach(this::removePlacement);
+            placeColor(region, Color.getSubColor(color), 0, 0);
           }
         }
         runner += 1;
