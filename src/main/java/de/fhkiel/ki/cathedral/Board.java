@@ -16,16 +16,34 @@ import java.util.Stack;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+/**
+ * Class used to emulate a cathedral-board.
+ *
+ * Contains all successful {@link Placement}s, number of available {@link Building}s and an
+ * array repesetiong the regions on the board.
+ *
+ * @author Eike Petersen {@literal <eike.petersen@fh-kiel.de>}
+ * @version 1.0 Beta
+ * @since 1.0 Beta
+ */
 public class Board {
   private final Map<Building, Integer> freeBuildings = new EnumMap<>(Building.class);
   private final List<Placement> placedBuildings = new ArrayList<>();
 
   private final Color[][] field = new Color[10][10];
 
+  /**
+   * Instantiates a new Board with all defauld {@link Building}s.
+   */
   public Board() {
   this(Building.values());
   }
 
+  /**
+   * Instantiates a new Board with the given {@link Building}s.
+   *
+   * @param buildings the buildings to use on this board
+   */
   public Board(Building... buildings) {
     for (Building building : buildings) {
       freeBuildings.put(building, building.getNumberInGame());
@@ -38,6 +56,11 @@ public class Board {
     }
   }
 
+  /**
+   * Creates a deep-copy of this board.
+   *
+   * @return the copy of this board
+   */
   public Board copy() {
     Board newBoard = new Board( new Building[]{} );
 
@@ -50,12 +73,26 @@ public class Board {
     return newBoard;
   }
 
-  private boolean regionsBuild = false;
-
+  /**
+   * Places a {@link Building} on this board. Returns if successful or not.
+   *
+   * @param placement the placement with the building to place
+   * @return if the building could be placed
+   */
   public boolean placeBuilding(Placement placement) {
     return placeBuilding(placement, false);
   }
 
+  /**
+   * Places a {@link Building} on this board. Returns if successful or not.
+   *
+   * Can be set to compute the regions to speed up computation.
+   * THIS CAN LEAD TO INCORRECT BOARDSTATES!
+   *
+   * @param placement the placement with the building to place
+   * @param fast      should the regions NOT be computed
+   * @return if the building could be placed
+   */
   public boolean placeBuilding(Placement placement, boolean fast) {
 
     if (freeBuildings.getOrDefault(placement.building(), 0) <= 0) {
@@ -73,7 +110,6 @@ public class Board {
             1); //do not want any negative building number
     placedBuildings.add(placement);
 
-    regionsBuild = false;
     if (!fast) {
       int numberOfConnections = 0;
       for(Position corner : placement.building().corners(placement.direction())){
@@ -82,7 +118,6 @@ public class Board {
           numberOfConnections += 1;
           if(numberOfConnections > 1){
             buildRegions();
-            // buildRegions(); //check for region in region bug
             break;
           }
         }
@@ -95,6 +130,14 @@ public class Board {
   private Placement lastPlacement = null;
   private Map<Color, Integer> currentScore = null;
 
+  /**
+   * Returns a map of the score.
+   *
+   * There are always scores for the {@link Color#Black} and the {@link Color#White} contained. <br>
+   * They range from 47 to 0 and show the aggregate of all unplaced buildings of the chosen color.
+   *
+   * @return the map with the score for {@link Color#Black} and {@link Color#White}
+   */
   public Map<Color, Integer> score() {
     if (currentScore == null ||
         !placedBuildings.isEmpty() && lastPlacement != placedBuildings.get(placedBuildings.size() - 1)) {
@@ -110,21 +153,41 @@ public class Board {
           .stream()
           .filter(building -> score.containsKey(building.getColor()))
           .forEach(building -> score.put(building.getColor(),
-              score.get(building.getColor()) + building.score() * freeBuildings.get(building)));
+              score.get(building.getColor())+building.score() * freeBuildings.get(building)));
       currentScore = score;
     }
 
     return currentScore;
   }
 
+  /**
+   * Gets number of free pieces of the {@link Building}-type.
+   *
+   * The default would be a number between 0 as minimum to 2 as maximum.
+   *
+   * @param building the {@link Building}-type
+   * @return the number of free pieces of the type
+   */
   public int getNumberOfFreeBuildings(Building building) {
     return freeBuildings.getOrDefault(building, 0);
   }
 
+  /**
+   * Gets a set of all known {@link Building}s.
+   * Should normally be the same {@link Building}s as {@link Building#values()}
+   *
+   * @return the set of all {@link Building}s
+   */
   public Set<Building> getBuildings() {
     return freeBuildings.keySet();
   }
 
+  /**
+   * Gets a list of unplaced {@link Building}s for the player {@link Color}.
+   *
+   * @param player the {@link Color} of the player
+   * @return the list of unplaced {@link Building}s
+   */
   public List<Building> getPlacableBuildings(Color player) {
     return getBuildings().stream()
         .filter(building -> building.getColor() == player)
@@ -132,10 +195,84 @@ public class Board {
         .toList();
   }
 
+  /**
+   * Gets all currently unplaced {@link Building}s in a list.
+   * There are no numbers for {@link Building}s. The buildings can be all valid building {@link Color}s.
+   *
+   * @return a list of all currently unplaced {@link Building}s
+   */
   public List<Building> getAllUnplacedBuildings() {
     return getBuildings().stream()
         .filter(building -> getNumberOfFreeBuildings(building) > 0)
         .toList();
+  }
+
+
+  /**
+   * Gets a {@link Map} of all {@link Building}s pointing at a number of how many of these are
+   * <b>not</b> placed.
+   *
+   * E.g. if the cathedral is placed the map would contain the entry cathedral -> 0
+   *
+   * @return the free buildings
+   */
+  public Map<Building, Integer> getFreeBuildings() {
+    return new EnumMap<>(freeBuildings);
+  }
+
+  /**
+   * Gets a list of all {@link Placement}s on the board.
+   *
+   * @return the list of all {@link Placement}s
+   */
+  public List<Placement> getPlacedBuildings() {
+    return new ArrayList<>(placedBuildings);
+  }
+
+  /**
+   * Get the board as a two-dimensional array of colors.
+   * Dimensions are 0-9 in x and y and are build to the format field[y][x] .<br>
+   * {@link Color}s range over the full spectrum of possibilities. <br>
+   * There are no indicators where {@link Building}s are placed. To get this information, use
+   * {@link Board#getPlacedBuildings()}.
+   *
+   * @return the array representing the board
+   */
+  public Color[][] getField() {
+    return field;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Board board1 = (Board) o;
+    return Objects.equals(freeBuildings, board1.freeBuildings) &&
+        Objects.equals(placedBuildings, board1.placedBuildings) &&
+        Arrays.deepEquals(field, board1.field);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hash(freeBuildings, placedBuildings);
+    result = 31 * result + Arrays.deepHashCode(field);
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    StringJoiner boardAsString = new StringJoiner(", ", Board.class.getSimpleName() + "[", "]")
+        .add("\nfreeBuildings=" + freeBuildings)
+        .add("\nplacedBuildings=" + placedBuildings)
+        .add("\nboard=\n");
+    for (int y = 0; y < 10; ++y) {
+      boardAsString.add(Arrays.toString(field[y]) + "\n");
+    }
+    return boardAsString.toString();
   }
 
   private void buildRegions() {
@@ -214,7 +351,6 @@ public class Board {
   private void removePlacement(Placement placement) {
     placedBuildings.remove(placement);
     freeBuildings.put(placement.building(), freeBuildings.getOrDefault(placement.building(), 0) + 1);
-    //placeColor(placement.form(), Color.None, placement.x(), placement.y());
   }
 
   private void placeColor(List<Position> form, Color color, int x, int y) {
@@ -235,50 +371,5 @@ public class Board {
     return onPosition == Color.None ||
         onPosition == Color.Black_Owned && toPlace == Color.Black ||
         onPosition == Color.White_Owned && toPlace == Color.White;
-  }
-
-  public Map<Building, Integer> getFreeBuildings() {
-    return new EnumMap<>(freeBuildings);
-  }
-
-  public List<Placement> getPlacedBuildings() {
-    return new ArrayList<>(placedBuildings);
-  }
-
-  public Color[][] getField() {
-    return field;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    Board board1 = (Board) o;
-    return Objects.equals(freeBuildings, board1.freeBuildings) &&
-        Objects.equals(placedBuildings, board1.placedBuildings) &&
-        Arrays.deepEquals(field, board1.field);
-  }
-
-  @Override
-  public int hashCode() {
-    int result = Objects.hash(freeBuildings, placedBuildings);
-    result = 31 * result + Arrays.deepHashCode(field);
-    return result;
-  }
-
-  @Override
-  public String toString() {
-    StringJoiner boardAsString = new StringJoiner(", ", Board.class.getSimpleName() + "[", "]")
-        .add("\nfreeBuildings=" + freeBuildings)
-        .add("\nplacedBuildings=" + placedBuildings)
-        .add("\nboard=\n");
-    for (int y = 0; y < 10; ++y) {
-      boardAsString.add(Arrays.toString(field[y]) + "\n");
-    }
-    return boardAsString.toString();
   }
 }
