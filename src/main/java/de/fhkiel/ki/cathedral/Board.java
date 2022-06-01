@@ -118,7 +118,7 @@ public class Board {
       int numberOfConnections = 0;
       for(Position corner : placement.building().corners(placement.direction())){
         Position point = placement.position().plus(corner);
-        if (!point.isViable() || field[point.y()][point.x()] == placement.building().getColor() ){
+        if (!point.isViable() || field[point.y()][point.x()] == placement.building().getColor() || numberOfPlacements == 3){
           numberOfConnections += 1;
           if(numberOfConnections > 1){
             buildRegions();
@@ -256,15 +256,14 @@ public class Board {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Board board1 = (Board) o;
-    return Objects.equals(freeBuildings, board1.freeBuildings) &&
-        Objects.equals(placedBuildings, board1.placedBuildings) &&
-        Arrays.deepEquals(field, board1.field);
+    Board board = (Board) o;
+    return numberOfPlacements == board.numberOfPlacements && freeBuildings.equals(board.freeBuildings) &&
+        placedBuildings.equals(board.placedBuildings) && Arrays.deepEquals(field, board.field);
   }
 
   @Override
   public int hashCode() {
-    int result = Objects.hash(freeBuildings, placedBuildings);
+    int result = Objects.hash(freeBuildings, placedBuildings, numberOfPlacements);
     result = 31 * result + Arrays.deepHashCode(field);
     return result;
   }

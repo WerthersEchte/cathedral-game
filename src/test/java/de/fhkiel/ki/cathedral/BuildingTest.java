@@ -159,4 +159,34 @@ class BuildingTest {
     assertThat(Building.White_Inn.score()).isEqualTo(3);
     assertThat(Building.Black_Academy.score()).isEqualTo(5);
   }
+
+  @Test
+  void possiblePlacements(){
+    assertThat(Building.Black_Tavern.getAllPossiblePlacements())
+        .hasSize(100)
+        .contains(new Placement(0,0, Direction._0, Building.Black_Tavern), new Placement(9,9, Direction._0, Building.Black_Tavern))
+        .hasSameSizeAs(Building.White_Tavern.getAllPossiblePlacements());
+
+    assertThat(Building.Black_Academy.getAllPossiblePlacements())
+        .contains(
+            new Placement(3,3, Direction._0, Building.Black_Academy),
+            new Placement(3,3, Direction._90, Building.Black_Academy),
+            new Placement(3,3, Direction._180, Building.Black_Academy),
+            new Placement(3,3, Direction._270, Building.Black_Academy)
+        );
+
+    Board board = new Board();
+    board.placeBuilding(new Placement(3,3, Direction._0, Building.Black_Academy), true);
+    board.placeBuilding(new Placement(0,0, Direction._0, Building.Black_Tavern), true);
+
+    assertThat(Building.Black_Academy.getPossiblePlacements(board)).isEmpty();
+    assertThat(Building.White_Academy.getPossiblePlacements(board)).isNotEmpty();
+    assertThat(Building.Black_Tavern.getPossiblePlacements(board)).isNotEmpty();
+
+    Game game = new Game(board);
+
+    assertThat(Building.Black_Academy.getPossiblePlacements(game)).isEmpty();
+    assertThat(Building.White_Academy.getPossiblePlacements(game)).isNotEmpty();
+    assertThat(Building.Black_Tavern.getPossiblePlacements(game)).isNotEmpty();
+  }
 }

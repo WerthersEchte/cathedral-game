@@ -3,6 +3,7 @@ package de.fhkiel.ki.cathedral;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -469,6 +470,8 @@ public enum Building {
   private final Set<Position> corners;
   private final Set<Position> silhouette;
 
+  private Set<Placement> allPossiblePlacements;
+
   Building(int id, String name, Color color, int numberInGame, Turnable turnable,
            int[][] form) {
     this.id = id;
@@ -631,6 +634,57 @@ public enum Building {
    */
   public Integer getNumberInGame() {
     return numberInGame;
+  }
+
+
+  /**
+   * Get all possible {@link Placement}s for this building in a cathedral game as a set.
+   *
+   * @return the set of possible {@link Placement}s
+   */
+  public Set<Placement> getAllPossiblePlacements(){
+    if(this.allPossiblePlacements == null){
+      Set<Placement> allPossiblePlacements = new HashSet<>();
+      Board board = new Board(this);
+      for (int y=0; y<=9; ++y) {
+        for (int x=0; x<=9; ++x) {
+          for(Direction rotation: turnable.getPossibleDirections()){
+            Placement current = new Placement(x,y, rotation, this);
+            if(board.copy().placeBuilding(current, true)){
+              allPossiblePlacements.add(current);
+            }
+          }
+        }
+      }
+      this.allPossiblePlacements = Collections.unmodifiableSet(allPossiblePlacements);
+    }
+    return this.allPossiblePlacements;
+  }
+
+  /**
+   * Gets the possible {@link Placement}s of this building for the given {@link Board}.
+   *
+   * @param board the board
+   * @return the set of possible {@link Placement}s
+   */
+  public Set<Placement> getPossiblePlacements(Board board){
+    Set<Placement> possiblePlacements = new HashSet<>();
+    for(Placement placement: getAllPossiblePlacements()){
+      if(board.copy().placeBuilding(placement, true)){
+        possiblePlacements.add(placement);
+      }
+    }
+    return possiblePlacements;
+  }
+
+  /**
+   * Gets the possible {@link Placement}s of this building for the given {@link Game}.
+   *
+   * @param game the game
+   * @return the set of possible {@link Placement}s
+   */
+  public Set<Placement> getPossiblePlacements(Game game){
+    return getPossiblePlacements(game.getBoard());
   }
 
   /**

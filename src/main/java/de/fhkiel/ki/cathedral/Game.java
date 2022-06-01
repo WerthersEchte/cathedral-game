@@ -1,8 +1,6 @@
 package de.fhkiel.ki.cathedral;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Core class used to handle a full game of cathedral.
@@ -219,6 +217,23 @@ public class Game {
     return lastTurn().score();
   }
 
+
+  /**
+   * Is the game finished.
+   *
+   * A game is finished if no {@link Building}s can be placed.
+   *
+   * @return true if no buildings can be placed, false otherwise
+   */
+  public boolean isFinished(){
+    for(Building unplacedBuilding: getBoard().getAllUnplacedBuildings()){
+      if(!unplacedBuilding.getPossiblePlacements(this).isEmpty()){
+        return false;
+      }
+    }
+    return true;
+  }
+
   /**
    * Enables or disables checks witch player can place stones
    * If set to true any building can be placed anytime. It still has to be a valid position.
@@ -227,6 +242,19 @@ public class Game {
    */
   public void ignoreRules(boolean ignoreRules) {
     this.ignoreRules = ignoreRules;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Game game = (Game) o;
+    return ignoreRules == game.ignoreRules && Objects.equals(turns, game.turns);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(turns, ignoreRules);
   }
 
   @Override
