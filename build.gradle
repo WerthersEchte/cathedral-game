@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'de.fhkiel.ki'
-version '1.0-Beta'
+version '1.0'
 
 sourceCompatibility = 16
 
